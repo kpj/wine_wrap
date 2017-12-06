@@ -107,6 +107,24 @@ def show() -> None:
         for k, v in sorted(data.items()):
             print(f' > {k}: {v}')
 
+@main.command(help='Associate script with given wine-prefix.')
+@click.argument('script', type=click.Path(exists=True))
+@click.argument('prefix', type=click.Path(exists=False))
+def set(script: str, prefix: str) -> None:
+    state_dict = get_state()
+
+    script_name = os.path.basename(script)
+    if script_name in state_dict:
+        state_dict[script_name].update({
+            'prefix': os.path.abspath(prefix)
+        })
+    else:
+        state_dict[script_name] = {
+            'prefix': os.path.abspath(prefix)
+        }
+
+    dump_state(state_dict)
+
 @main.command(help='Execute given script in wine-prefix.')
 @click.argument('script', type=click.Path(exists=True))
 @click.option(
