@@ -71,14 +71,17 @@ class WineWrapper:
             print(' > Creating new wine-prefix...')
             os.makedirs(self.prefix)
 
+            # initialize new wine-prefix
             self._git('init')
-            self.configure()
+            self._wine('wineboot')
+            self._commit('Initial commit')
         else:
             print(' > Using existing wine-prefix...')
 
     def _commit(self, msg: str = '') -> None:
         date_str = datetime.datetime.now()
 
+        # commit changes to current wine-prefix
         self._git('add', '.')
         self._git('commit', '-a', m=f'[{date_str}] {msg}')
 
