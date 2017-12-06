@@ -98,6 +98,10 @@ class WineWrapper:
 def main() -> None:
     pass
 
+def abort_if_false(ctx, param, value):
+    if not value:
+        ctx.abort()
+
 @main.command(help='Show current setup.')
 def show() -> None:
     state_dict = get_state()
@@ -124,6 +128,14 @@ def set(script: str, prefix: str) -> None:
         }
 
     dump_state(state_dict)
+
+@main.command(help='Clear all associations.')
+@click.option(
+    '--yes', is_flag=True, expose_value=False, callback=abort_if_false,
+    prompt='Are you sure you want to clear all associations?')
+def clear():
+    if os.path.exists(state_file):
+        os.remove(state_file)
 
 @main.command(help='Execute given script in wine-prefix.')
 @click.argument('script', type=click.Path(exists=True))
