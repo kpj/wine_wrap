@@ -2,7 +2,7 @@ import os
 import json
 import datetime
 
-from typing import Dict
+from typing import Dict, Optional
 
 import sh
 import click
@@ -31,23 +31,30 @@ state_file = f'{adirs.user_data_dir}/state.csv'
 prefix_dir = _ensure_dir(f'{adirs.user_data_dir}/prefixes/')
 
 class WineWrapper:
-    def __init__(self, script_path: str) -> None:
+    def __init__(
+        self,
+        script_path: str, prefix: Optional[str] = None
+    ) -> None:
         self.script_path = os.path.abspath(script_path)
         script_name = os.path.basename(self.script_path)
         print(f'Initializing wine-wrapper for "{script_name}"')
 
-        state_dict = get_state()
-        if script_name in state_dict:
-            self.prefix = state_dict[script_name]['prefix']
-            print(' > Using existing script-prefix association...')
-        else:
-            self.prefix = f'{prefix_dir}/WINEPREFIX__{script_name}/'
-            print(' > Creating new script-prefix association...')
+        if prefix is None:
+            state_dict = get_state()
+            if script_name in state_dict:
+                self.prefix = state_dict[script_name]['prefix']
+                print(' > Using existing script-prefix association...')
+            else:
+                self.prefix = f'{prefix_dir}/WINEPREFIX__{script_name}/'
+                print(' > Creating new script-prefix association...')
 
-            state_dict[script_name] = {
-                'prefix': self.prefix
-            }
-            dump_state(state_dict)
+                state_dict[script_name] = {
+                    'prefix': self.prefix
+                }
+                dump_state(state_dict)
+        else:
+            self.prefix = os.path.abspath(prefix)
+            print(f' > Using forced prefix...')
 
         self._setup()
 
@@ -99,8 +106,11 @@ def show() -> None:
 
 @main.command(help='Execute given script in wine-prefix.')
 @click.argument('script', type=click.Path(exists=True))
-def run(script: str) -> None:
-    ww = WineWrapper(script)
+@click.option(
+    '-p', '--prefix', default=None, type=click.Path(exists=False),
+    help='Force WINEPREFIX to use.')
+def run(script: str, prefix: Optional[str]) -> None:
+    ww = WineWrapper(script, prefix)
     ww.execute()
 
 if __name__ == '__main__':
