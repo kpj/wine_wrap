@@ -134,6 +134,7 @@ def set(script: str, prefix: str) -> None:
     '--yes', is_flag=True, expose_value=False, callback=abort_if_false,
     prompt='Are you sure you want to clear all associations?')
 def clear():
+    print(f'Deleting {state_file}...')
     if os.path.exists(state_file):
         os.remove(state_file)
 
