@@ -166,10 +166,21 @@ def set(script: str, prefix: str) -> None:
 @click.option(
     '--yes', is_flag=True, expose_value=False, callback=abort_if_false,
     prompt='Are you sure you want to clear all associations?')
-def clear():
+@click.option(
+    '--delete-prefixes', is_flag=True,
+    help='Also delete all prefixes (including master).')
+def clear(delete_prefixes: bool):
+    # delete state file
     print(f'Deleting {state_file}...')
     if os.path.exists(state_file):
         os.remove(state_file)
+
+    # delete prefixes if wanted
+    if delete_prefixes:
+        print(f'Deleting prefixes...')
+        for entry in os.scandir(prefix_dir):
+            print(f' > {entry.name}')
+            shutil.rmtree(entry.path)
 
 @main.command(help='Execute given script in wine-prefix.')
 @click.argument('script', type=click.Path(exists=True))
