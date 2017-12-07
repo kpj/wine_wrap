@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 import datetime
 
 from typing import Dict, Optional
@@ -30,69 +31,101 @@ adirs = AppDirs('wine_wrap', 'kpj')
 state_file = f'{adirs.user_data_dir}/state.csv'
 prefix_dir = _ensure_dir(f'{adirs.user_data_dir}/prefixes/')
 
-class WineWrapper:
-    def __init__(
-        self,
-        script_path: str, prefix: Optional[str] = None
-    ) -> None:
-        self.script_path = os.path.abspath(script_path)
-        script_name = os.path.basename(self.script_path)
-        print(f'Initializing wine-wrapper for "{script_name}"')
-
-        if prefix is None:
-            state_dict = get_state()
-            if script_name in state_dict:
-                self.prefix = state_dict[script_name]['prefix']
-                print(' > Using existing script-prefix association...')
-            else:
-                self.prefix = f'{prefix_dir}/WINEPREFIX__{script_name}/'
-                print(' > Creating new script-prefix association...')
-
-                state_dict[script_name] = {
-                    'prefix': self.prefix
-                }
-                dump_state(state_dict)
-        else:
-            self.prefix = os.path.abspath(prefix)
-            print(f' > Using forced prefix...')
+class PrefixHandler:
+    def __init__(self, prefix_path: str) -> None:
+        self.prefix = prefix_path
+        self.master_prefix = f'{prefix_dir}/master_prefix'
 
         self._setup()
 
-    def configure(self) -> None:
-        self._wine('winecfg')
-        self._commit('Configured')
-
-    def execute(self) -> None:
-        print(f'Executing {self.script_path}')
-        self._wine(self.script_path)
+    def __repr__(self) -> str:
+        return self.prefix
 
     def _setup(self) -> None:
-        if not os.path.exists(self.prefix):
-            print(' > Creating new wine-prefix...')
-            os.makedirs(self.prefix)
-
-            # initialize new wine-prefix
-            self._git('init')
-            self._wine('wineboot')
-            self._commit('Initial commit')
+        # check for master-prefix
+        if not os.path.exists(self.master_prefix):
+            print('Master-prefix does not exist. Creating...')
+            self._create_prefix(self.master_prefix)
         else:
-            print(' > Using existing wine-prefix...')
+            print('Using existing master-prefix...')
 
-    def _commit(self, msg: str = '') -> None:
+        # create actual prefix if needed
+        if not os.path.exists(self.prefix):
+            print('Creating new wine-prefix from master...')
+            shutil.copytree(self.master_prefix, self.prefix, symlinks=True)
+        else:
+            print('Using existing wine-prefix...')
+
+    def _create_prefix(self, path: str) -> None:
+        os.makedirs(path)
+
+        # initialize new wine-prefix
+        print(' > Initializing git repository')
+        self._git('init', cwd=path)
+
+        print(' > Booting wine')
+        self._wine('wineboot', cwd=path)
+
+        print(' > Commiting changes')
+        self._commit('Initial commit', cwd=path)
+
+    def _commit(self, msg: str = '', cwd: Optional[str] = None) -> None:
         date_str = datetime.datetime.now()
 
         # commit changes to current wine-prefix
-        self._git('add', '.')
-        self._git('commit', '-a', m=f'[{date_str}] {msg}')
+        self._git('add', '.', cwd=cwd)
+        self._git('commit', '-a', m=f'[{date_str}] {msg}', cwd=cwd)
 
-    def _git(self, *arg: str, **kwargs: str) -> None:
-        sh.git(*arg, **kwargs, _cwd=self.prefix)
+    def _git(
+        self,
+        *arg: str, cwd: Optional[str] = None, **kwargs: str
+    ) -> None:
+        sh.git(*arg, **kwargs, _cwd=cwd or self.prefix)
 
-    def _wine(self, *arg: str, **kwargs: str) -> None:
+    def _wine(
+        self,
+        *arg: str, cwd: Optional[str] = None, **kwargs: str
+    ) -> None:
         cmd_env = {
-            'WINEPREFIX': self.prefix
+            'WINEPREFIX': cwd or self.prefix
         }
         sh.wine(*arg, **kwargs, _env=cmd_env)
+
+class WineWrapper:
+    def __init__(
+        self,
+        script_path: str, prefix_path: Optional[str] = None
+    ) -> None:
+        self.script_path = os.path.abspath(script_path)
+        script_name = os.path.basename(self.script_path)
+        print(f'Initializing wine-wrapper for "{script_name}"...')
+
+        if prefix_path is None:
+            state_dict = get_state()
+            if script_name in state_dict:
+                prefix_path = state_dict[script_name]['prefix']
+                print(' > Using existing script-prefix association')
+            else:
+                prefix_path = f'{prefix_dir}/WINEPREFIX__{script_name}/'
+                print(' > Creating new script-prefix association')
+
+                state_dict[script_name] = {
+                    'prefix': prefix_path
+                }
+                dump_state(state_dict)
+        else:
+            prefix_path = os.path.abspath(prefix_path)
+            print(f' > Using forced prefix')
+
+        self.prefix = PrefixHandler(prefix_path)
+
+    def configure(self) -> None:
+        self.prefix._wine('winecfg')
+        self.prefix._commit('Configured')
+
+    def execute(self) -> None:
+        print(f'Executing {self.script_path}')
+        self.prefix._wine(self.script_path)
 
 @click.group()
 def main() -> None:
