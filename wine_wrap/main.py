@@ -66,7 +66,7 @@ class PrefixHandler:
         print(' > Booting wine')
         self._wine('wineboot', cwd=path)
 
-        print(' > Commiting changes')
+        print(' > Committing changes')
         self._commit('Initial commit', cwd=path)
 
     def _commit(self, msg: str = '', cwd: Optional[str] = None) -> None:
