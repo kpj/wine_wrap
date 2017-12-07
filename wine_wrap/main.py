@@ -158,8 +158,8 @@ def show(print_path: bool) -> None:
             print(f' > {s}')
 
 @main.command(help='Associate script with given wine-prefix.')
-@click.argument('script', type=click.Path(exists=True))
-@click.argument('prefix', type=click.Path(exists=False))
+@click.argument('script', type=click.Path(exists=True), metavar='<script path>')
+@click.argument('prefix', type=click.Path(exists=False), metavar='<prefix path>')
 def set(script: str, prefix: str) -> None:
     state_dict = get_state()
 
@@ -196,7 +196,7 @@ def clear(delete_prefixes: bool):
             shutil.rmtree(entry.path)
 
 @main.command(help='Execute given script in wine-prefix.')
-@click.argument('script', type=click.Path(exists=True))
+@click.argument('script', type=click.Path(exists=True), metavar='<script path>')
 @click.option(
     '-p', '--prefix', default=None, type=click.Path(exists=False),
     help='Force WINEPREFIX to use.')
