@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 import datetime
+import collections
 
 from typing import Dict, Optional
 
@@ -136,13 +137,25 @@ def abort_if_false(ctx, param, value):
         ctx.abort()
 
 @main.command(help='Show current setup.')
-def show() -> None:
+@click.option(
+    '--print-path', is_flag=True,
+    help='Also print location of each prefix.')
+def show(print_path: bool) -> None:
     state_dict = get_state()
 
+    tmp_dict = collections.defaultdict(list)
     for script_name, data in sorted(state_dict.items()):
-        print(f'--- {script_name} ---')
-        for k, v in sorted(data.items()):
-            print(f' > {k}: {v}')
+        tmp_dict[data['prefix']].append(script_name)
+
+    for prefix, scripts in tmp_dict.items():
+        prefix_name = prefix.split('/')[-2]
+        print(f'--- {prefix_name} ---')
+
+        if print_path:
+            print(f'Path: "{prefix}"')
+
+        for s in scripts:
+            print(f' > {s}')
 
 @main.command(help='Associate script with given wine-prefix.')
 @click.argument('script', type=click.Path(exists=True))
