@@ -64,7 +64,9 @@ class PrefixHandler:
         self,
         *args: str, cwd: Optional[str] = None, **kwargs: str
     ) -> None:
-        cmd_env = {
+        cmd_env = os.environ.copy()
+        cmd_env.update({
             'WINEPREFIX': cwd or self.prefix
-        }
-        sh.wine(*arg, **kwargs, _env=cmd_env)
+        })
+
+        sh.wine(*args, **kwargs, _env=cmd_env)
