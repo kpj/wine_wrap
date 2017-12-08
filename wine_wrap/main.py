@@ -9,7 +9,7 @@ from typing import Dict, Optional
 import click
 
 from .wine_wrapper import WineWrapper
-from .utils import prefix_dir, state_file, get_state, dump_state, get_prefix_path
+from .utils import prefix_dir, state_file, get_state, dump_state, get_prefix_path, get_prefix_name_from_path
 
 
 @click.group()
@@ -29,16 +29,16 @@ def show(print_path: bool) -> None:
 
     tmp_dict = collections.defaultdict(list)
     for script_name, data in sorted(state_dict.items()):
-        tmp_dict[data['prefix']].append(script_name)
+        prefix_name = get_prefix_name_from_path(data['prefix'])
+        tmp_dict[prefix_name].append(script_name)
 
-    for prefix, scripts in tmp_dict.items():
-        prefix_name = prefix.split('/')[-2]
+    for prefix_name, scripts in tmp_dict.items():
         print(f'--- {prefix_name} ---')
 
         if print_path:
             print(f'Path: "{prefix}"')
 
-        for s in scripts:
+        for s in sorted(scripts):
             print(f' > {s}')
 
 @main.command(help='Associate script with given wine-prefix.')

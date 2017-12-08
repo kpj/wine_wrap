@@ -43,3 +43,11 @@ def get_prefix_path(prefix: str) -> str:
             f'Interpreting "{prefix}" as path '
             f'(points to "{abs_prefix}")')
         return abs_prefix
+
+def get_prefix_name_from_path(path: str) -> str:
+    """ Assume prefix-name to the last non-empty string after splitting along '/'
+    """
+    parts = path.split('/')
+    for p in reversed(parts):
+        if p:
+            return p
