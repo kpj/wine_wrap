@@ -56,13 +56,13 @@ class PrefixHandler:
 
     def _git(
         self,
-        *arg: str, cwd: Optional[str] = None, **kwargs: str
+        *args: str, cwd: Optional[str] = None, **kwargs: str
     ) -> None:
-        sh.git(*arg, **kwargs, _cwd=cwd or self.prefix)
+        sh.git(*args, **kwargs, _cwd=cwd or self.prefix)
 
     def _wine(
         self,
-        *arg: str, cwd: Optional[str] = None, **kwargs: str
+        *args: str, cwd: Optional[str] = None, **kwargs: str
     ) -> None:
         cmd_env = {
             'WINEPREFIX': cwd or self.prefix
