@@ -85,8 +85,20 @@ def clear(delete_prefixes: bool) -> None:
 @click.option(
     '-p', '--prefix', default=None, type=click.Path(exists=False),
     help='Force WINEPREFIX to use.')
-def run(script: str, prefix: Optional[str]) -> None:
-    ww = WineWrapper(script, prefix)
+@click.option(
+    '-n', '--name', default=None,
+    help='Set prefix-name.')
+def run(script: str, prefix: Optional[str], name: Optional[str]) -> None:
+    if prefix is not None and name is not None:
+        print('You can either specify a path or set a name, but not both.')
+        exit(-1)
+
+    prefix_spec = {
+        'path': prefix,
+        'name': name
+    }
+
+    ww = WineWrapper(script, prefix_spec)
     ww.execute()
 
 if __name__ == '__main__':
