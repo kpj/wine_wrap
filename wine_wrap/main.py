@@ -9,7 +9,7 @@ from typing import Dict, Optional
 import click
 
 from .wine_wrapper import WineWrapper
-from .utils import prefix_dir, state_file, get_state, dump_state
+from .utils import prefix_dir, state_file, get_state, dump_state, get_prefix_path
 
 
 @click.group()
@@ -47,14 +47,15 @@ def show(print_path: bool) -> None:
 def set(script: str, prefix: str) -> None:
     state_dict = get_state()
 
+    prefix_path = get_prefix_path(prefix)
     script_name = os.path.basename(script)
     if script_name in state_dict:
         state_dict[script_name].update({
-            'prefix': os.path.abspath(prefix)
+            'prefix': prefix_path
         })
     else:
         state_dict[script_name] = {
-            'prefix': os.path.abspath(prefix)
+            'prefix': prefix_path
         }
 
     dump_state(state_dict)

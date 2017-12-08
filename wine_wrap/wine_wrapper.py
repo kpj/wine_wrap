@@ -3,7 +3,7 @@ import os
 from typing import Optional
 
 from .prefix_handler import PrefixHandler
-from .utils import prefix_dir, get_state, dump_state
+from .utils import prefix_dir, get_state, dump_state, get_prefix_path
 
 
 class WineWrapper:
@@ -29,7 +29,7 @@ class WineWrapper:
                 }
                 dump_state(state_dict)
         else:
-            prefix_path = os.path.abspath(prefix_path)
+            prefix_path = get_prefix_path(prefix_path)
             print(f' > Using forced prefix')
 
         assert prefix_path is not None
