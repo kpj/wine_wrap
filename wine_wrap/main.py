@@ -4,7 +4,7 @@ import shutil
 import datetime
 import collections
 
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import click
 
@@ -63,22 +63,32 @@ def set(script: str, prefix: str) -> None:
 @main.command(help='Clear all associations.')
 @click.option(
     '--yes', is_flag=True, expose_value=False, callback=abort_if_false,
-    prompt='Are you sure you want to clear all associations?')
+    prompt='Are you sure you want to clear your associations?')
+@click.option(
+    '-p', '--prefix', multiple=True,
+    help='Delete information related to this prefix.')
 @click.option(
     '--delete-prefixes', is_flag=True,
     help='Also delete all prefixes (including master).')
-def clear(delete_prefixes: bool) -> None:
-    # delete state file
-    print(f'Deleting {state_file}...')
-    if os.path.exists(state_file):
-        os.remove(state_file)
+def clear(prefix: List[str], delete_prefixes: bool) -> None:
+    state_dict = get_state()
+    prefixes_to_rm = list(map(get_prefix_path, prefix)) or list(map(lambda x: x['prefix'], state_dict.values()))
+
+    # delete associations
+    print(f'Deleting associations...')
+    for script_name, data in list(state_dict.items()):
+        if data['prefix'] in prefixes_to_rm:
+            print(f' > {script_name}:{data["prefix"]}')
+            del state_dict[script_name]
+
+    dump_state(state_dict)
 
     # delete prefixes if wanted
     if delete_prefixes:
         print(f'Deleting prefixes...')
-        for entry in os.scandir(prefix_dir):
-            print(f' > {entry.name}')
-            shutil.rmtree(entry.path)
+        for entry in prefixes_to_rm:
+            print(f' > {get_prefix_name_from_path(entry)}')
+            shutil.rmtree(entry)
 
 @main.command(help='Execute given script in wine-prefix.')
 @click.argument('script', type=click.Path(exists=True), metavar='<script path>')
@@ -88,7 +98,12 @@ def clear(delete_prefixes: bool) -> None:
 @click.option(
     '-n', '--name', default=None,
     help='Set prefix-name.')
-def run(script: str, prefix: Optional[str], name: Optional[str]) -> None:
+@click.option(
+    '-c', '--configure', is_flag=True,
+    help='Run winecfg before executing command.')
+def run(
+    script: str, prefix: Optional[str], name: Optional[str], configure: bool
+) -> None:
     if prefix is not None and name is not None:
         print('You can either specify a path or set a name, but not both.')
         exit(-1)

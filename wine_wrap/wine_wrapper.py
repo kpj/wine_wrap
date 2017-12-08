@@ -30,7 +30,7 @@ class WineWrapper:
                 print(' > Creating new script-prefix association')
 
                 state_dict[script_name] = {
-                    'prefix': prefix_path
+                    'prefix': os.path.abspath(prefix_path)
                 }
                 dump_state(state_dict)
         else:
