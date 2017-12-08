@@ -40,5 +40,9 @@ class WineWrapper:
         self.prefix._commit('Configured')
 
     def execute(self) -> None:
-        print(f'Executing {self.script_path}')
+        print(f'--- Executing ---')
+        print(f'Prefix: "{self.script_path}"')
+        print(f'Script: "{self.prefix}"')
+        print('------------------')
+
         self.prefix._wine(self.script_path)
