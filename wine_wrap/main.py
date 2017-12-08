@@ -114,6 +114,9 @@ def run(
     }
 
     ww = WineWrapper(script, prefix_spec)
+    if configure:
+        print('Running winecfg before script execution...')
+        ww.configure()
     ww.execute()
 
 if __name__ == '__main__':
