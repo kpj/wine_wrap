@@ -70,3 +70,10 @@ class PrefixHandler:
         })
 
         sh.wine(*args, **kwargs, _env=cmd_env)
+
+    def configure(self, msg: str = '') -> None:
+        self._wine('winecfg')
+
+        if msg:
+            msg = f' ({msg})'
+        self._commit(msg='Configure'+msg)

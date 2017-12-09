@@ -41,10 +41,6 @@ class WineWrapper:
         assert prefix_path is not None
         self.prefix = PrefixHandler(prefix_path)
 
-    def configure(self) -> None:
-        self.prefix._wine('winecfg')
-        self.prefix._commit('Configured')
-
     def execute(self) -> None:
         print(f'--- Executing ---')
         print(f'Prefix: "{self.prefix}"')

@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 import click
 
 from .wine_wrapper import WineWrapper
+from .prefix_handler import PrefixHandler
 from .utils import prefix_dir, state_file, get_state, dump_state, get_prefix_path, get_prefix_name_from_path
 
 
@@ -43,7 +44,7 @@ def show(print_path: bool) -> None:
 
 @main.command(help='Associate script with given wine-prefix.')
 @click.argument('script', type=click.Path(exists=True), metavar='<script path>')
-@click.argument('prefix', type=click.Path(exists=False), metavar='<prefix path>')
+@click.argument('prefix', type=click.Path(exists=False), metavar='<prefix>')
 def set(script: str, prefix: str) -> None:
     state_dict = get_state()
 
@@ -59,6 +60,16 @@ def set(script: str, prefix: str) -> None:
         }
 
     dump_state(state_dict)
+
+@main.command(help='Associate script with given wine-prefix.')
+@click.argument('prefix', type=click.Path(exists=False), metavar='<prefix>')
+@click.option(
+    '-m', '--message', default='',
+    help='Specify commit-message for this configuration step.')
+def configure(prefix: str, message: str) -> None:
+    prefix_path = get_prefix_path(prefix)
+    prefix_handler = PrefixHandler(prefix_path)
+    prefix_handler.configure(msg=message)
 
 @main.command(help='Clear all associations.')
 @click.option(
@@ -116,7 +127,7 @@ def run(
     ww = WineWrapper(script, prefix_spec)
     if configure:
         print('Running winecfg before script execution...')
-        ww.configure()
+        ww.prefix.configure()
     ww.execute()
 
 if __name__ == '__main__':
