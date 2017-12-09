@@ -1,4 +1,5 @@
 import os
+import sys
 import datetime
 
 from typing import Optional
@@ -57,7 +58,9 @@ class PrefixHandler:
             'WINEPREFIX': cwd or self.prefix
         })
 
-        sh.wine(*args, **kwargs, _env=cmd_env)
+        sh.wine(
+            *args, **kwargs,
+            _env=cmd_env, _out=sys.stdout, _err=sys.stderr)
 
     def configure(self, msg: str = '') -> None:
         self._wine('winecfg')
