@@ -11,7 +11,7 @@ import sh
 if TYPE_CHECKING:
     from .prefix_handler import PrefixHandler
 
-from .utils import prefix_dir
+from .utils import prefix_dir, get_prefix_name_from_path
 
 
 BTRFS_COMMANDS = ['btrfs', 'mkfs.btrfs', 'truncate', 'losetup']
@@ -115,8 +115,8 @@ class BTRFS_Handler(BaseHandler):
     def create_prefix_from_master(
         self, master_prefix: str, prefix: str
     ) -> None:
-        master_prefix_name = os.path.basename(master_prefix)
-        prefix_name = os.path.basename(prefix)
+        master_prefix_name = get_prefix_name_from_path(master_prefix)
+        prefix_name = get_prefix_name_from_path(prefix)
 
         print(' > Creating prefix snapshot')
         with sh.contrib.sudo:
