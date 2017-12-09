@@ -2,6 +2,8 @@ import os
 
 from typing import Dict, Optional
 
+import sh
+
 from .prefix_handler import PrefixHandler
 from .utils import prefix_dir, get_state, dump_state, get_prefix_path
 
@@ -47,4 +49,10 @@ class WineWrapper:
         print(f'Script: "{self.script_path}"')
         print('------------------')
 
-        self.prefix._wine(self.script_path)
+        try:
+            self.prefix._wine(self.script_path)
+        except sh.ErrorReturnCode as e:
+            print(f'Wine exited with {e.exit_code}')
+            raise
+        finally:
+            self.prefix.on_exit()

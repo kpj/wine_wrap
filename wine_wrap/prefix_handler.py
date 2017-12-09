@@ -14,7 +14,7 @@ class PrefixHandler:
         self.prefix = prefix_path
         self.master_prefix = f'{prefix_dir}/master_prefix'
 
-        self.fs = FSHandler(self)
+        self.fs = FSHandler.get_handler(self)
         self._setup()
 
     def __repr__(self) -> str:
@@ -65,3 +65,6 @@ class PrefixHandler:
         if msg:
             msg = f' ({msg})'
         self._commit(msg='Configure'+msg)
+
+    def on_exit(self) -> None:
+        self.fs.cleanup()
