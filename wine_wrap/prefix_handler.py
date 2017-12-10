@@ -12,10 +12,11 @@ from .utils import prefix_dir
 
 class PrefixHandler:
     def __init__(self, prefix_path: str) -> None:
-        self.prefix = self._get_prefix_path(prefix_path)
-        self.master_prefix = f'{prefix_dir}/master_prefix'
-
         self.fs = FSHandler.get_handler(self)
+
+        self.master_prefix = f'{prefix_dir}/master_prefix'
+        self.prefix = self._get_prefix_path(prefix_path)
+
         self._setup()
 
     def __repr__(self) -> str:
