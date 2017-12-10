@@ -58,6 +58,16 @@ def set(script: str, prefix: str) -> None:
 
     dump_state(state_dict)
 
+@main.command(help='Scan for executables in given prefix.')
+@click.argument('prefix', type=click.Path(exists=False), metavar='<prefix>')
+def scan(prefix: str) -> None:
+    with PrefixHandler(prefix) as ph:
+        exec_list = ph.scan_for_executables()
+
+    print('Found files:')
+    for fpath in exec_list:
+        print(f' > "{fpath}"')
+
 @main.command(help='Associate script with given wine-prefix.')
 @click.argument('prefix', type=click.Path(exists=False), metavar='<prefix>')
 @click.option(

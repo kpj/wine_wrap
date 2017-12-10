@@ -1,4 +1,5 @@
 import os
+import io
 import sys
 import datetime
 
@@ -80,6 +81,13 @@ class PrefixHandler:
             *args, **kwargs,
             _env=cmd_env, _out=sys.stdout, _err=sys.stderr)
 
+    def _find(self, pattern: str) -> List[str]:
+        # TODO: implement in native Python
+        reader = io.StringIO()
+        sh.find(self.prefix, '-name', pattern, _out=reader)
+        result = reader.getvalue()
+        return result.split('\n')
+
     def configure(self, msg: str = '') -> None:
         self._wine('winecfg')
 
@@ -89,3 +97,9 @@ class PrefixHandler:
 
     def delete(self) -> None:
         self.fs.delete_prefix(self.prefix)
+
+    def scan_for_executables(self) -> List[str]:
+        file_list = self._find(r'*.exe')
+        cur_pref = f'{self.prefix}/drive_c/'
+        return [f[len(cur_pref):] for f in file_list
+                if f and not f.startswith(f'{cur_pref}windows')]
