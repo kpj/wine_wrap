@@ -3,7 +3,8 @@ import io
 import sys
 import datetime
 
-from typing import Optional
+from types import TracebackType
+from typing import Optional, List, Type
 
 import sh
 
@@ -19,6 +20,17 @@ class PrefixHandler:
         self.prefix = self._get_prefix_path(prefix_path)
 
         self._setup()
+
+    def __enter__(self) -> 'PrefixHandler':
+        return self
+
+    def __exit__(
+        self,
+        type: Optional[Type[BaseException]],
+        value: Optional[Exception],
+        traceback: Optional[TracebackType]
+    ) -> None:
+        self.fs._on_exit()
 
     def __repr__(self) -> str:
         return self.prefix

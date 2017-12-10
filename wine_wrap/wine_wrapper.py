@@ -1,6 +1,7 @@
 import os
 
-from typing import Dict, Optional
+from types import TracebackType
+from typing import Dict, Optional, Type
 
 import sh
 
@@ -41,6 +42,17 @@ class WineWrapper:
 
         assert prefix_path is not None
         self.prefix = PrefixHandler(prefix_path)
+
+    def __enter__(self) -> 'WineWrapper':
+        return self
+
+    def __exit__(
+        self,
+        type_: Optional[Type[BaseException]],
+        value: Optional[Exception],
+        traceback: Optional[TracebackType]
+    ) -> None:
+        self.prefix.__exit__(type_, value, traceback)
 
     def execute(self) -> None:
         print(f'--- Executing ---')

@@ -70,8 +70,8 @@ class BTRFS_Handler(BaseHandler):
         with sh.contrib.sudo:
             sh.mount(self.prefix_image_path, prefix_dir)
 
-    def __exit__(self) -> None:
-        print('Unmounting prefix-directory')
+    def _on_exit(self) -> None:
+        print(' > Unmounting prefix-directory')
         with sh.contrib.sudo:
             sh.umount(prefix_dir)
 
