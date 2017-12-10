@@ -71,3 +71,6 @@ class PrefixHandler:
 
     def on_exit(self) -> None:
         self.fs.cleanup()
+
+    def delete(self) -> None:
+        self.fs.delete_prefix(self.prefix)

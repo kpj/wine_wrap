@@ -1,7 +1,4 @@
 import os
-import json
-import shutil
-import datetime
 import collections
 
 from typing import Dict, List, Optional
@@ -99,7 +96,7 @@ def clear(prefix: List[str], delete_prefixes: bool) -> None:
         print(f'Deleting prefixes...')
         for entry in prefixes_to_rm:
             print(f' > {get_prefix_name_from_path(entry)}')
-            shutil.rmtree(entry)
+            PrefixHandler(entry).delete()
 
 @main.command(help='Execute given script in wine-prefix.')
 @click.argument('script', type=click.Path(exists=True), metavar='<script path>')

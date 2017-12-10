@@ -34,6 +34,10 @@ class BaseHandler(ABC):
     def cleanup(self) -> None:
         pass
 
+    @abstractmethod
+    def delete_prefix(self, prefix: str) -> None:
+        pass
+
 class RAWFS_Handler(BaseHandler):
     def create_master_prefix(self, master_prefix_path: str) -> None:
         os.makedirs(master_prefix_path)
@@ -55,6 +59,9 @@ class RAWFS_Handler(BaseHandler):
 
     def cleanup(self) -> None:
         pass
+
+    def delete_prefix(self, prefix: str) -> None:
+        shutil.rmtree(prefix)
 
 class BTRFS_Handler(BaseHandler):
     # TODO: handle permissions correctly
@@ -134,6 +141,11 @@ class BTRFS_Handler(BaseHandler):
         print('Unmounting prefix-directory')
         with sh.contrib.sudo:
             sh.umount(prefix_dir)
+
+    def delete_prefix(self, prefix: str) -> None:
+        prefix_name = get_prefix_name_from_path(prefix)
+        with sh.contrib.sudo:
+            sh.btrfs.subvolume.delete(prefix_name, _cwd=prefix_dir)
 
 class FSHandler:
     @staticmethod
