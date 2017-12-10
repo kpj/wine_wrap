@@ -12,7 +12,7 @@ from .utils import prefix_dir
 
 class PrefixHandler:
     def __init__(self, prefix_path: str) -> None:
-        self.prefix = prefix_path
+        self.prefix = self._get_prefix_path(prefix_path)
         self.master_prefix = f'{prefix_dir}/master_prefix'
 
         self.fs = FSHandler.get_handler(self)
@@ -20,6 +20,23 @@ class PrefixHandler:
 
     def __repr__(self) -> str:
         return self.prefix
+
+    def _get_prefix_path(self, prefix: str) -> str:
+        """ Interpret prefix as name if it exists in default directory,
+            otherwise as path
+        """
+        prefix_in_default_location = os.path.abspath(f'{prefix_dir}/WINEPREFIX__{prefix}')
+        if os.path.exists(prefix_in_default_location):
+            print(
+                f'Interpreting "{prefix}" as prefix-name '
+                f'(points to "{prefix_in_default_location}")')
+            return prefix_in_default_location
+        else:
+            abs_prefix = os.path.abspath(prefix)
+            print(
+                f'Interpreting "{prefix}" as path '
+                f'(points to "{abs_prefix}")')
+            return abs_prefix
 
     def _setup(self) -> None:
         # check for master-prefix
@@ -68,9 +85,6 @@ class PrefixHandler:
         if msg:
             msg = f' ({msg})'
         self._commit(msg='Configure'+msg)
-
-    def on_exit(self) -> None:
-        self.fs.cleanup()
 
     def delete(self) -> None:
         self.fs.delete_prefix(self.prefix)

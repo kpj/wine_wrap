@@ -5,7 +5,7 @@ from typing import Dict, Optional
 import sh
 
 from .prefix_handler import PrefixHandler
-from .utils import prefix_dir, get_state, dump_state, get_prefix_path
+from .utils import prefix_dir, get_state, dump_state
 
 
 class WineWrapper:
@@ -37,7 +37,6 @@ class WineWrapper:
                 dump_state(state_dict)
         else:
             assert prefix_name is None
-            prefix_path = get_prefix_path(prefix_path)
             print(f' > Using forced prefix')
 
         assert prefix_path is not None
@@ -54,5 +53,3 @@ class WineWrapper:
         except sh.ErrorReturnCode as e:
             print(f'Wine exited with {e.exit_code}')
             raise
-        finally:
-            self.prefix.on_exit()

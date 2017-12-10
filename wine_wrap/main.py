@@ -7,7 +7,7 @@ import click
 
 from .wine_wrapper import WineWrapper
 from .prefix_handler import PrefixHandler
-from .utils import prefix_dir, state_file, get_state, dump_state, get_prefix_path, get_prefix_name_from_path
+from .utils import prefix_dir, state_file, get_state, dump_state, get_prefix_name_from_path
 
 
 @click.group()
@@ -45,7 +45,7 @@ def show(print_path: bool) -> None:
 def set(script: str, prefix: str) -> None:
     state_dict = get_state()
 
-    prefix_path = get_prefix_path(prefix)
+    prefix_path = PrefixHandler(prefix).prefix
     script_name = os.path.basename(script)
     if script_name in state_dict:
         state_dict[script_name].update({
@@ -64,7 +64,7 @@ def set(script: str, prefix: str) -> None:
     '-m', '--message', default='',
     help='Specify commit-message for this configuration step.')
 def configure(prefix: str, message: str) -> None:
-    prefix_path = get_prefix_path(prefix)
+    prefix_path = PrefixHandler(prefix).prefix
     prefix_handler = PrefixHandler(prefix_path)
     prefix_handler.configure(msg=message)
 
@@ -80,6 +80,7 @@ def configure(prefix: str, message: str) -> None:
     help='Also delete all prefixes (including master).')
 def clear(prefix: List[str], delete_prefixes: bool) -> None:
     state_dict = get_state()
+    get_prefix_path = lambda p: PrefixHandler(p).prefix
     prefixes_to_rm = list(map(get_prefix_path, prefix)) or list(map(lambda x: x['prefix'], state_dict.values()))
 
     # delete associations
@@ -96,9 +97,7 @@ def clear(prefix: List[str], delete_prefixes: bool) -> None:
         print(f'Deleting prefixes...')
         for entry in prefixes_to_rm:
             print(f' > {get_prefix_name_from_path(entry)}')
-
-            ph = PrefixHandler(entry)
-            ph.on_exit()
+            PrefixHandler(entry).delete()
 
 @main.command(help='Execute given script in wine-prefix.')
 @click.argument('script', type=click.Path(exists=True), metavar='<script path>')

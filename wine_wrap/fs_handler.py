@@ -31,10 +31,6 @@ class BaseHandler(ABC):
         pass
 
     @abstractmethod
-    def cleanup(self) -> None:
-        pass
-
-    @abstractmethod
     def delete_prefix(self, prefix: str) -> None:
         pass
 
@@ -57,18 +53,29 @@ class RAWFS_Handler(BaseHandler):
     ) -> None:
         shutil.copytree(master_prefix, prefix, symlinks=True)
 
-    def cleanup(self) -> None:
-        pass
-
     def delete_prefix(self, prefix: str) -> None:
         shutil.rmtree(prefix)
 
 class BTRFS_Handler(BaseHandler):
     # TODO: handle permissions correctly
 
-    def create_master_prefix(self, master_prefix_path: str) -> None:
-        prefix_image_path = f'{prefix_dir}/../prefix_data.img'
+    def __init__(self, prefix_handler: 'PrefixHandler') -> None:
+        BaseHandler.__init__(self, prefix_handler)
 
+        self.prefix_image_path = f'{prefix_dir}/../prefix_data.img'
+        self._setup_image_file(self.prefix_image_path)
+
+        # mount image file
+        print(' > Mount image')
+        with sh.contrib.sudo:
+            sh.mount(self.prefix_image_path, prefix_dir)
+
+    def __exit__(self) -> None:
+        print('Unmounting prefix-directory')
+        with sh.contrib.sudo:
+            sh.umount(prefix_dir)
+
+    def _setup_image_file(self, prefix_image_path: str) -> None:
         if not os.path.exists(prefix_image_path):
             print('Creating BTRFS-image...')
 
@@ -89,11 +96,7 @@ class BTRFS_Handler(BaseHandler):
         else:
             print('Use existing BTRFS-image...')
 
-        # mount image file
-        print(' > Mount image')
-        with sh.contrib.sudo:
-            sh.mount(prefix_image_path, prefix_dir)
-
+    def create_master_prefix(self, master_prefix_path: str) -> None:
         # create master-prefix subvolume
         if not os.path.exists(master_prefix_path):
             print(' > Create master-prefix subvolume')
@@ -136,11 +139,6 @@ class BTRFS_Handler(BaseHandler):
         print(' > Set owner to current user')
         with sh.contrib.sudo:
             sh.chown(f'{getpass.getuser()}:users', prefix)
-
-    def cleanup(self) -> None:
-        print('Unmounting prefix-directory')
-        with sh.contrib.sudo:
-            sh.umount(prefix_dir)
 
     def delete_prefix(self, prefix: str) -> None:
         prefix_name = get_prefix_name_from_path(prefix)
