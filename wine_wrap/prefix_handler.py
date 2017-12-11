@@ -8,13 +8,13 @@ from typing import Optional, List, Type
 
 import sh
 
-from .fs_handler import FSHandler
+from .fs_handler import FSManager
 from .utils import prefix_dir
 
 
 class PrefixHandler:
     def __init__(self, prefix_path: str) -> None:
-        self.fs = FSHandler.get_handler(self)
+        self.fs = FSManager.get_handler(self)
 
         self.master_prefix = f'{prefix_dir}/master_prefix'
         self.prefix = self._get_prefix_path(prefix_path)

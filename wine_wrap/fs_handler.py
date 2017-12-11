@@ -152,7 +152,7 @@ class BTRFS_Handler(BaseHandler):
         with sh.contrib.sudo:
             sh.btrfs.subvolume.delete(prefix_name, _cwd=prefix_dir)
 
-class FSHandler:
+class FSManager:
     @staticmethod
     def _can_use_btrfs() -> bool:
         print('Checking for BTRFS support...')
@@ -169,7 +169,7 @@ class FSHandler:
 
     @staticmethod
     def get_handler(prefix_handler: 'PrefixHandler'):
-        if FSHandler._can_use_btrfs():
+        if FSManager._can_use_btrfs():
             print('>>> Using BTRFS image to store prefixes <<<')
             return BTRFS_Handler(prefix_handler)
         else:
