@@ -21,6 +21,10 @@ class BaseHandler(ABC):
         self.prefix_handler = prefix_handler
 
     @abstractmethod
+    def _on_exit(self) -> None:
+        pass
+
+    @abstractmethod
     def create_master_prefix(self, master_prefix_path: str) -> None:
         pass
 
@@ -35,6 +39,9 @@ class BaseHandler(ABC):
         pass
 
 class RAWFS_Handler(BaseHandler):
+    def _on_exit(self) -> None:
+        pass
+
     def create_master_prefix(self, master_prefix_path: str) -> None:
         os.makedirs(master_prefix_path)
 
