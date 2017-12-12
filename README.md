@@ -1,5 +1,7 @@
 # wine_wrap
 
+[![PyPI](https://img.shields.io/pypi/v/wine_wrap.svg?style=flat)](https://pypi.python.org/pypi/wine_wrap)
+
 A versioned wine-prefix management tool with memory-shared prefixes.
 
 This tool simplifies the maintenance of individual wine-prefixes per executable.
