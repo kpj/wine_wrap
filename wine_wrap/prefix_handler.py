@@ -39,7 +39,7 @@ class PrefixHandler:
         """ Interpret prefix as name if it exists in default directory,
             otherwise as path
         """
-        prefix_in_default_location = os.path.abspath(f'{prefix_dir}/WINEPREFIX__{prefix}')
+        prefix_in_default_location = os.path.abspath(f'{prefix_dir}/{prefix}')
         if os.path.exists(prefix_in_default_location):
             print(
                 f'Interpreting "{prefix}" as prefix-name '

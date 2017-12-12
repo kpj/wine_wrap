@@ -29,7 +29,7 @@ class WineWrapper:
                 msg_app = f'(ignoring name "{prefix_name}", clear association if you want to set a new name)' if prefix_name is not None else ''
                 print(' > Using existing script-prefix association' + msg_app)
             else:
-                prefix_path = f'{prefix_dir}/WINEPREFIX__{prefix_name or script_name}/'
+                prefix_path = f'{prefix_dir}/{prefix_name or script_name}/'
                 print(' > Creating new script-prefix association')
 
                 state_dict[script_name] = {

@@ -52,7 +52,7 @@ We can then make sure that the correct script-prefix associations are set:
 
 ```bash
 $ wine_wrap show
---- WINEPREFIX__MyOwnPrefix ---
+--- MyOwnPrefix ---
  > installer.exe
  > executable.exe
 ```
