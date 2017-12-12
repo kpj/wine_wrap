@@ -27,6 +27,7 @@ Commands:
   clear      Clear all associations.
   configure  Associate script with given wine-prefix.
   run        Execute given script in wine-prefix.
+  scan       Scan for executables in given prefix.
   set        Associate script with given wine-prefix.
   show       Show current setup.
 ```
@@ -41,11 +42,14 @@ $ wine_wrap run --configure --name MyOwnPrefix installer.exe
 [..]
 ```
 
-Afterwards, associate the newly installed executable with this prefix:
+Afterwards, find the newly installed executable within this prefix and associate it correctly:
 
 ```bash
-$ wine_wrap set /path/to/executable.exe MyOwnPrefix
+$ wine_wrap scan MyOwnPrefix
 [..]
+ > "/path/to/executable.exe"
+[..]
+$ wine_wrap set "/path/to/executable.exe" MyOwnPrefix
 ```
 
 We can then make sure that the correct script-prefix associations are set:

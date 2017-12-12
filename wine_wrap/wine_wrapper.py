@@ -14,8 +14,7 @@ class WineWrapper:
         self,
         script_path: str, prefix_spec: Dict[str, Optional[str]] = None
     ) -> None:
-        self.script_path = os.path.abspath(script_path)
-        script_name = os.path.basename(self.script_path)
+        script_name = os.path.basename(script_path)
         print(f'Initializing wine-wrapper for "{script_name}"...')
 
         prefix_path = prefix_spec['path']
@@ -26,7 +25,7 @@ class WineWrapper:
             if script_name in state_dict:
                 prefix_path = state_dict[script_name]['prefix']
 
-                msg_app = f'(ignoring name "{prefix_name}", clear association if you want to set a new name)' if prefix_name is not None else ''
+                msg_app = f' (ignoring name "{prefix_name}", clear association if you want to set a new name)' if prefix_name is not None else ''
                 print(' > Using existing script-prefix association' + msg_app)
             else:
                 prefix_path = f'{prefix_dir}/{prefix_name or script_name}/'
@@ -40,8 +39,20 @@ class WineWrapper:
             assert prefix_name is None
             print(f' > Using forced prefix')
 
+        # setup prefix-handler
         assert prefix_path is not None
         self.prefix = PrefixHandler(prefix_path)
+
+        # find script-path
+        if os.path.exists(script_path):
+            self.script_path = os.path.abspath(script_path)
+        else:  # assumed to exist in wine-prefix
+            print('Assuming script exists in associated wine-prefix...')
+            self.script_path = f'{self.prefix.prefix}/drive_c/{script_path}'
+
+        if not os.path.exists(self.script_path):
+            raise RuntimeError(
+                f'Script "{self.script_path}" could not be found...')
 
     def __enter__(self) -> 'WineWrapper':
         return self

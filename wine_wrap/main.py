@@ -40,7 +40,7 @@ def show(print_path: bool) -> None:
             print(f' > {s}')
 
 @main.command(help='Associate script with given wine-prefix.')
-@click.argument('script', type=click.Path(exists=True), metavar='<script path>')
+@click.argument('script', type=click.Path(exists=False), metavar='<script path>')
 @click.argument('prefix', type=click.Path(exists=False), metavar='<prefix>')
 def set(script: str, prefix: str) -> None:
     state_dict = get_state()
@@ -116,7 +116,7 @@ def clear(prefix: List[str], delete_prefixes: bool) -> None:
                 ph.delete()
 
 @main.command(help='Execute given script in wine-prefix.')
-@click.argument('script', type=click.Path(exists=True), metavar='<script path>')
+@click.argument('script', type=click.Path(exists=False), metavar='<script path>')
 @click.option(
     '-p', '--prefix', default=None, type=click.Path(exists=False),
     help='Force WINEPREFIX to use.')
